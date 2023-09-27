@@ -47,15 +47,18 @@ class PhaseEncoder(BrianObject):
                                         self.N, model_params, input_params, oscillation_params, simulation_params)
         
         #multi-line string defines neuron model in BRIAN2
+        #dv/dt = (-(v - v_rest) + R_m*(I_theta + I_s))/tau_m + v_noise/sqrt(tau_m)*xi : volt
         self.eqs = '''
-        dv/dt = (-(v - v_rest) + R_m*(I_theta + I_s))/tau_m + v_noise/sqrt(tau_m)*xi : volt
+        dv/dt = (-(v - v_rest) + R_m*(I_theta + I_s) + v_noise)/tau_m: volt
+        dv_noise/dt = -v_noise/tau_noise + xi*v_noise_sigma/sqrt(tau_noise) : volt
+        v_noise_sigma : volt
         I_theta = I_osc*cos(omega*t -pi + phi_0) : amp
         T = 2*pi/omega : second
         v_rest : volt
         R_m: ohm
         I_s: amp
         tau_m: second
-        v_noise : volt
+        tau_noise : second
         I_osc : amp
         omega : Hz
         phi_0 : 1
@@ -106,7 +109,8 @@ class PhaseEncoder(BrianObject):
         self.groups["encoder"].v_rest = m_params["v_rest"]
         self.groups["encoder"].R_m = m_params["R_m"]
         self.groups["encoder"].tau_m = m_params["tau_m"]
-        self.groups["encoder"].v_noise = m_params["noise_frac"]*(m_params["v_thres"] - m_params["v_rest"])
+        self.groups["encoder"].tau_noise = m_params["tau_noise"]
+        self.groups["encoder"].v_noise_sigma = m_params["noise_frac"]*(m_params["v_thres"] - m_params["v_rest"])
         self.groups["encoder"].I_osc = o_params["I_osc"]
         self.groups["encoder"].omega = o_params["omega"]
         self.groups['encoder'].I_s = i_params["I_s"]
